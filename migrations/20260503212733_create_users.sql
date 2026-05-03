@@ -1,4 +1,5 @@
--- migrations/0001_create_users.sql
+-- Add migration script here
+
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,

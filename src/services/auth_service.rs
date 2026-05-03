@@ -7,7 +7,7 @@ pub async fn register_user(
 ) -> Result<String, Box<dyn std::error::Error>> {
     let hashed = crate::utils::hash::hash_password(&data.password);
 
-    let _ = sqlx::query_as::<_, UserResponse>(
+    let user_result = sqlx::query_as::<_, UserResponse>(
         "INSERT INTO users (email,password) VALUES ($1,$2) RETURNING id,email",
     )
     .bind(&data.email)
@@ -22,8 +22,8 @@ pub async fn register_user(
         }
         Box::new(e) as Box<dyn std::error::Error>
     });
-
-    Ok(format!("User {} created successfully", &data.email))
+    let user = user_result.unwrap();
+    Ok(format!("User {} created successfully", user.email))
 }
 
 pub async fn login_user(
@@ -36,11 +36,8 @@ pub async fn login_user(
     .bind(&data.email)
     .fetch_one(&pool)
     .await;
-    let user = match user_result {
-        Ok(u) => u,
-        Err(sqlx::Error::RowNotFound) => return Ok("Invalid credentials".to_string()),
-        Err(e) => return Err(Box::new(e)),
-    };
+
+    let user = user_result.unwrap();
 
     let verify = crate::utils::hash::verify_password(&data.password, &user.password);
 

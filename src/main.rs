@@ -12,10 +12,10 @@ use std::net::SocketAddr;
 async fn main() {
     dotenv().ok();
     let pool = db::connect_db().await;
-    sqlx::migrate!("./migrations")
-        .run(&pool)
-        .await
-        .expect("Migrations Failed!");
+    //    sqlx::migrate!("./migrations")
+    //       .run(&pool)
+    //     .await
+    //   .expect("Migrations Failed!");
     let app = routes::create_routes().with_state(pool);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
