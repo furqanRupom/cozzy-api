@@ -1,0 +1,17 @@
+
+services:
+  db:
+    image: postgres:15
+    container_name: cozzy-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: cozzy
+      POSTGRES_PASSWORD: cozzy123
+      POSTGRES_DB: cozzy_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
