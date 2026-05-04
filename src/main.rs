@@ -1,9 +1,11 @@
 mod config;
 mod db;
+mod error;
 mod handlers;
 mod models;
 mod routes;
 mod services;
+mod shared;
 mod utils;
 use dotenv::dotenv;
 use std::net::SocketAddr;
