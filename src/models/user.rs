@@ -12,6 +12,7 @@ pub struct LoginUser {
 }
 
 #[derive(Serialize)]
+#[allow(dead_code)]
 pub struct AuthResponse {
     pub message: String,
     pub token: Option<String>,

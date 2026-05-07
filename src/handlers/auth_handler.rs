@@ -23,7 +23,7 @@ pub async fn login(
     Ok((
         StatusCode::OK,
         Json(ApiResponse::success(
-            "Login successful",
+            "User Logged in successfully",
             TokenResponse {
                 access_token: token,
             },
