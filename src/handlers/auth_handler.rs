@@ -1,5 +1,5 @@
 use crate::error::AppError;
-use crate::models::user::{LoginUser, RegisterUser};
+use crate::models::user::{LoginUser, RefreshToken, RegisterUser};
 use crate::services::auth_service;
 use crate::shared::response::{ApiResponse, TokenResponse};
 use axum::{Json, extract::State, http::StatusCode};
@@ -24,6 +24,22 @@ pub async fn login(
         StatusCode::OK,
         Json(ApiResponse::success(
             "User Logged in successfully",
+            TokenResponse {
+                access_token: token,
+            },
+        )),
+    ))
+}
+pub async fn refresh_token(
+    State(pool): State<PgPool>,
+    Json(payload): Json<RefreshToken>,
+) -> Result<(StatusCode, Json<ApiResponse<TokenResponse>>), AppError> {
+    let token = auth_service::refresh_token_user(pool, payload).await?;
+
+    Ok((
+        StatusCode::OK,
+        Json(ApiResponse::success(
+            "Token refreshed successfully",
             TokenResponse {
                 access_token: token,
             },

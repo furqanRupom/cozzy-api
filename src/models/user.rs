@@ -31,3 +31,8 @@ pub struct UserLoginResponse {
     pub email: String,
     pub password: String,
 }
+
+#[derive(Deserialize, Serialize)]
+pub struct RefreshToken {
+    pub token: String,
+}

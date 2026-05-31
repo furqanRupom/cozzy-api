@@ -1,8 +1,10 @@
 use crate::{
     error::AppError,
-    models::user::{LoginUser, RegisterUser, UserLoginResponse, UserResponse},
-    utils::hash::{hash_password, verify_password},
-    utils::jwt::create_token,
+    models::user::{LoginUser, RefreshToken, RegisterUser, UserLoginResponse, UserResponse},
+    utils::{
+        hash::{hash_password, verify_password},
+        jwt::{create_token, decode_token},
+    },
 };
 use axum::http::StatusCode;
 use sqlx::{Pool, Postgres};
@@ -50,4 +52,33 @@ pub async fn login_user(pool: Pool<Postgres>, data: LoginUser) -> Result<String,
             "Invalid Credentials",
         ))
     }
+}
+pub async fn refresh_token_user(
+    pool: Pool<Postgres>,
+    data: RefreshToken,
+) -> Result<String, AppError> {
+    let token_verify = match decode_token(&data.token) {
+        Ok(ts) => ts,
+        Err(_) => {
+            return Err(AppError::new(StatusCode::UNAUTHORIZED, "Invalid token"));
+        }
+    };
+
+    let user_result =
+        sqlx::query_as::<_, UserLoginResponse>("SELECT id,email,password FROM users WHERE id = $1")
+            .bind(&token_verify.sub)
+            .fetch_one(&pool)
+            .await;
+
+    let user = match user_result {
+        Ok(user) => user,
+        Err(sqlx::Error::RowNotFound) => {
+            return Err(AppError::new(StatusCode::UNAUTHORIZED, "User Not Found"));
+        }
+        Err(e) => {
+            return Err(AppError::from(e)); // Handles other DB errors
+        }
+    };
+
+    Ok(create_token(user.id.to_string()))
 }
